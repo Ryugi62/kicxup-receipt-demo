@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>영수증형 규제 상담 데모</title>
+<style>
+:root{--bg:#fff;--fg:#191F28;--sub:#4E5968;--line:#E5E8EB;--card:#F9FAFB;--brand:#1B64DA;--ok:#1B7F4B;--warn:#B25E00;--warnbg:#FFF6E5;--hl:#F2F8FF;--onbrand:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#17171C;--fg:#F2F4F6;--sub:#B0B8C1;--line:#333D4B;--card:#202027;--brand:#6AA5FF;--ok:#5FD08B;--warn:#FFB454;--warnbg:#3A2E18;--hl:#1E2A3D;--onbrand:#0B1220}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 -apple-system,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif}
+main{max-width:720px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:26px;line-height:1.3;margin:8px 0 8px;letter-spacing:-.02em}
+h2{font-size:20px;margin:28px 0 8px}
+.lede{color:var(--sub);margin:0 0 16px}
+.fixed{background:var(--warnbg);color:var(--fg);border-radius:16px;padding:12px 16px;font-size:15px;margin:0 0 20px}
+.tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
+.tabs button{min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit;font-size:15px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--brand);color:var(--onbrand);border-color:var(--brand)}
+button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+label{display:block;font-weight:700;margin:12px 0 6px}
+textarea,input{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--fg);font:inherit;padding:12px 14px}
+textarea{min-height:84px;resize:vertical}
+.cta{margin-top:12px;min-height:52px;width:100%;border:0;border-radius:16px;background:#1B64DA;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.chips button{min-height:44px;padding:6px 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:14px;cursor:pointer;text-align:left}
+.card{background:var(--card);border-radius:16px;padding:16px;margin:12px 0}
+.big{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.tag{font-size:13px;font-weight:700;color:var(--brand)}
+.rcpt{background:var(--hl);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+.ok{color:var(--ok);font-weight:700}.no{color:var(--warn);font-weight:700}
+.chk span{display:inline-block;margin-right:12px;font-size:15px}
+.hold{background:var(--warnbg);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+details{margin-top:8px}summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--sub);font-size:15px}
+.note{color:var(--sub);font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+.tw{overflow-x:auto}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<div class="tag">KICXUP 챌린지 제안 · 공개 데모</div>
+<h1>영수증형 규제 상담</h1>
+<p class="lede">답을 만들기 전에, 법령 원문 영수증이 붙는지부터 검사합니다. 질문이나 인용문을 직접 넣어 보세요.</p>
+<p class="fixed" id="scope"><b>이 화면이 하는 것</b> — 산업집적활성화 및 공장설립에 관한 법률·시행령·시행규칙 <span id="n-arts">379</span>개 조(국가법령정보센터 공개 전문, 2026-10-22 내려받음)에서 검색하고 세 검사를 합니다. 답 문장을 쓰는 일과 뜻이 맞는지 판정하는 일은 하지 않습니다(PoC에서 합니다). 입력은 이 브라우저 밖으로 나가지 않습니다.</p>
+
+<div class="tabs" role="tablist">
+  <button role="tab" id="t1" aria-selected="true" aria-controls="p1">질문으로 찾기</button>
+  <button role="tab" id="t2" aria-selected="false" aria-controls="p2">인용문 검사</button>
+  <button role="tab" id="t3" aria-selected="false" aria-controls="p3">표본 10건 대조</button>
+</div>
+
+<section id="p1" role="tabpanel" aria-labelledby="t1">
+  <label for="q-input">입주기업이 겪는 애로를 한 문장으로</label>
+  <textarea id="q-input">공장을 다 지은 뒤 신고는 언제까지 해야 하나요</textarea>
+  <div class="chips" id="chips"></div>
+  <button class="cta" id="q-run" type="button">영수증 찾기</button>
+  <div id="q-out" aria-live="polite"></div>
+</section>
+
+<section id="p2" role="tabpanel" aria-labelledby="t2" hidden>
+  <label for="quote-article">조문 (예: 법 제15조 · 령 제20조 · 칙 제12조의2)</label>
+  <input id="quote-article" value="법 제15조" autocomplete="off">
+  <label for="quote-claim">내가 하려는 주장</label>
+  <textarea id="quote-claim">완료신고는 대통령령으로 정하는 기간 내에 하여야 한다</textarea>
+  <label for="quote-text">근거로 붙일 인용문 (조문에서 복사)</label>
+  <textarea id="quote-text">대통령령으로 정하는 기간 내에 시장ㆍ군수 또는 구청장에게 공장설립등의 완료신고를 하여야 한다.</textarea>
+  <div class="chips"><button type="button" id="flip-char">글자 1개 바꿔 보기</button><button type="button" id="flip-neg">주장을 반대로 바꿔 보기</button></div>
+  <button class="cta" id="quote-run" type="button">세 검사 돌리기</button>
+  <div id="quote-out" aria-live="polite"></div>
+</section>
+
+<section id="p3" role="tabpanel" aria-labelledby="t3" hidden>
+  <p class="note">대표 질의 10건을 이 화면의 검색기로 지금 다시 돌린 결과입니다. 인용문은 검색 1순위 조문에서 뽑은 문장이고, 「원문 일치」는 법령 XML 원본을 별도 경로(정규식)로 읽은 검사(test_raw.py)와 같은 결과입니다.</p>
+  <div id="sample-sum" class="card"></div>
+  <div class="tw"><table id="sample-table"><thead><tr><th>#</th><th>질의</th><th>정답 조문</th><th>1순위 조문</th><th>상위3 안</th><th>인용 문장 (앞부분)</th><th>원문 일치</th><th>사슬</th></tr></thead><tbody></tbody></table></div>
+</section>
+<p class="note" style="margin-top:32px">어휘 검사는 인용은 진짜인데 주장만 뜻이 반대인 경우를 못 잡습니다(주장 반대로 바꿔 보기로 확인). 그래서 제안의 핵심은 PoC의 함의 판정과 외부 법무 검수 표본입니다. 코드: core.js · 시험: test.js, test_raw.py.</p>
+</main>
+<script src="core.js"></script>
+<script>
+(function(){
+  const $=(id)=>document.getElementById(id);
+  const esc=(s)=>String(s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  let ix=null, exp=null;
+  const tabs=["t1","t2","t3"];
+  tabs.forEach((t,i)=>$(t).addEventListener("click",()=>{tabs.forEach((u,j)=>{$(u).setAttribute("aria-selected",i===j);$("p"+(j+1)).hidden=i!==j;});}));
+  function receiptCard(art,query,rank,score){
+    const s=ix.bestSentence(art,query), v=Receipt.verdict(s,s,art,ix), c=v.chain;
+    const kids=c.children.slice(0,4).join(" · ");
+    return '<div class="card"><div class="tag">'+rank+'순위 · 유사도 '+score.toFixed(3)+'</div>'
+      +'<div class="big">'+esc(art.key)+'</div><div>'+esc(art.title)+'</div>'
+      +'<div class="rcpt">'+esc(s)+'</div>'
+      +'<div class="chk"><span class="'+(v.quoteOk?"ok":"no")+'">'+(v.quoteOk?"✓":"✗")+' 원문 글자 일치</span>'
+      +'<span class="'+(c.closed?"ok":"no")+'">'+(c.closed?"✓":"✗")+' 인용 사슬 '+(c.closed?"닫힘":"열림")+'</span></div>'
+      +(c.closed?'':'<div class="hold"><b>보류</b> — 이 조문이 위임한 하위 조문을 찾지 못했습니다'+(c.missingInternal.length?': '+esc(c.missingInternal.join(", ")):'')+'. 사람이 확인해야 합니다.</div>')
+      +'<details><summary>사슬과 원문 전체 보기</summary><p class="note">하위 조문: '+(kids||"없음")+'</p><p class="note">'+esc(art.text)+'</p></details></div>';
+  }
+  function runQuery(){
+    const q=$("q-input").value.trim(); if(!q){$("q-out").innerHTML='<div class="hold">질문을 한 줄 입력해 주세요.</div>';return;}
+    const top=ix.top(q,3,["법","령"]);
+    $("q-out").innerHTML='<h2>상위 3개 조문 영수증</h2>'+top.map(([k,sc],i)=>receiptCard(ix.byKey.get(k),q,i+1,sc)).join("")
+      +'<p class="note">1순위가 항상 정답은 아닙니다. 이웃 조문이 올라오는 경우를 표본 탭에서 숫자로 보여 줍니다. 점수 문턱만으로는 답이 없는 질문을 가려내지 못해서, 근거가 충분한지는 PoC의 따로 만든 판정이 맡습니다.</p>';
+  }
+  function runQuote(){
+    const key=$("quote-article").value.replace(/\s+/g," ").trim(), art=ix.byKey.get(key);
+    if(!art){$("quote-out").innerHTML='<div class="hold">「'+esc(key)+'」 조문을 찾지 못했습니다. 「법 제15조」처럼 법·령·칙 + 조 번호로 적어 주세요.</div>';return;}
+    const v=Receipt.verdict($("quote-claim").value,$("quote-text").value,art,ix);
+    const row=(ok,t)=>'<span class="'+(ok?"ok":"no")+'">'+(ok?"✓ ":"✗ ")+t+'</span>';
+    $("quote-out").innerHTML='<div class="card"><div class="big">'+(v.answer?"답할 수 있음":"보류")+'</div>'
+      +'<div class="chk">'+row(v.quoteOk,"원문 글자 일치")+row(v.chain.closed,"인용 사슬 "+(v.chain.closed?"닫힘":"열림"))+row(v.support.supported,"어휘·수치 지지 (겹침 "+v.support.overlap+")")+'</div>'
+      +(v.answer?'':'<div class="hold">막힌 이유: '+esc(v.holdReasons.join(" · "))+(v.support.numMissing.length?' (인용문에 없는 수치: '+esc(v.support.numMissing.join(", "))+')':'')+'</div>')
+      +(v.answer?'<div class="hold">어휘·수치 검사를 통과했다는 뜻입니다. 주장의 뜻이 인용문과 같은지는 이 화면이 판정하지 못합니다(PoC의 함의 판정·법무 검수).</div>':'')
+      +'<p class="note">'+esc(art.key)+' '+esc(art.title)+' 원문과 비교했습니다.</p></div>';
+  }
+  function flipChar(){
+    const t=$("quote-text").value; if(t.length<6)return; const i=Math.floor(t.length/2);
+    $("quote-text").value=t.slice(0,i)+(t[i]==="가"?"나":"가")+t.slice(i+1); runQuote();
+  }
+  function flipNeg(){
+    const c=$("quote-claim").value;
+    $("quote-claim").value=c.replace("하여야 한다","하지 아니하여도 된다"); runQuote();
+  }
+  function samples(){
+    const tb=$("sample-table").querySelector("tbody"); let hit=0,top1=0,qok=0,closed=0,html="";
+    exp.rows.forEach((r,i)=>{
+      const top=ix.top(r.q,3).map((x)=>x[0]), art=ix.byKey.get(top[0]), s=ix.bestSentence(art,r.q);
+      const h=r.gold.some((g)=>top.includes(g)), t1=r.gold.includes(top[0]), ok=Receipt.quoteInArticle(s,art), cl=ix.chainStatus(art).closed;
+      hit+=h; top1+=t1; qok+=ok; closed+=cl;
+      html+='<tr><td>'+(i+1)+'</td><td>'+esc(r.q)+'</td><td>'+esc(r.gold.join(" / "))+'</td><td>'+esc(top[0])+'</td><td class="'+(h?"ok":"no")+'">'+(h?"예":"아니오")+'</td><td>'+esc(s.slice(0,60))+'…</td><td class="'+(ok?"ok":"no")+'">'+(ok?"일치":"불일치")+'</td><td>'+(cl?"닫힘":"열림")+'</td></tr>';
+    });
+    tb.innerHTML=html;
+    $("sample-sum").innerHTML='<div class="big">원문 일치 '+qok+'/10</div><div>정답 조문이 상위 3개 안 '+hit+'/10 · 1순위 '+top1+'/10 · 사슬 닫힘 '+closed+'/10</div><div class="note">「원문 일치」는 검색 1순위 조문에서 뽑은 문장이라 구성상 높게 나옵니다. 1순위가 정답이 아닌 질의에서도 일치하므로, 정답 여부는 「정답 조문」 열로 따로 봅니다.</div>';
+  }
+  Promise.all([fetch("data.json").then((r)=>r.json()),fetch("expected.json").then((r)=>r.json())]).then(([d,e])=>{
+    ix=Receipt.makeIndex(d); exp=e; $("n-arts").textContent=d.length;
+    $("chips").innerHTML=e.rows.slice(0,6).map((r)=>'<button type="button">'+esc(r.q)+'</button>').join("")
+      +'<button type="button">'+esc(e.unanswerable[0].q)+'</button>';
+    $("chips").addEventListener("click",(ev)=>{if(ev.target.tagName==="BUTTON"){$("q-input").value=ev.target.textContent;runQuery();}});
+    $("q-run").addEventListener("click",runQuery); $("quote-run").addEventListener("click",runQuote);
+    $("flip-char").addEventListener("click",flipChar); $("flip-neg").addEventListener("click",flipNeg);
+    samples(); runQuery(); runQuote();
+  }).catch(()=>{$("q-out").innerHTML='<div class="hold">데이터를 불러오지 못했습니다. 새로고침해 주세요.</div>';});
+})();
+</script>
+</body>
+</html>
